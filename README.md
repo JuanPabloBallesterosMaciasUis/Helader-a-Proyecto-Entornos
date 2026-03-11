@@ -1,4 +1,4 @@
 # Helader-a-Proyecto-Entornos
 
-Temática
+# Temática
 El proyecto consiste en desarrollar un software enfocado en la gestión de pedidos de productos de helados pre empacados de distintas marcas. A diferencia de una heladería tradicional, el modelo se centra en la distribución de productos ya fabricados por empresas como Crem Helado, Colombina y otras, integrando su oferta en una misma plataforma. La idea es reunir en un solo sitio un catálogo con diferentes presentaciones, desde unidades individuales hasta paquetes familiares, y permitir que el usuario combine productos de varias marcas en un mismo pedido. El sistema estará organizado de manera estructurada para facilitar la consulta del inventario, la selección de productos y la gestión de órdenes, tanto para compras individuales como para pedidos de mayor volumen.
