@@ -14,22 +14,26 @@ public class MarcaController {
     @Autowired
     private MarcaRepository repository;
 
+    // Obtiene todas las marcas disponibles en la base de datos
     @GetMapping
     public List<Marca> getAll() {
         return repository.findAll();
     }
 
+    // Registra una nueva marca
     @PostMapping
     public Marca create(@RequestBody Marca entity) {
         return repository.save(entity);
     }
 
+    // Busca una marca específica por su ID
     @GetMapping("/{id}")
     public ResponseEntity<Marca> getById(@PathVariable Long id) {
         return repository.findById(id).map(ResponseEntity::ok)
                          .orElse(ResponseEntity.notFound().build());
     }
 
+    // Actualiza los datos de una marca existente
     @PutMapping("/{id}")
     public ResponseEntity<Marca> update(@PathVariable Long id, @RequestBody Marca details) {
         return repository.findById(id).map(entity -> {
@@ -41,6 +45,7 @@ public class MarcaController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    // Elimina una marca por su ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if(repository.existsById(id)) {

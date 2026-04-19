@@ -14,22 +14,26 @@ public class ProductoController {
     @Autowired
     private ProductoRepository repository;
 
+    // Obtiene todo el catálogo de helados
     @GetMapping
     public List<Producto> getAll() {
         return repository.findAll();
     }
 
+    // Registra un nuevo producto en el inventario
     @PostMapping
     public Producto create(@RequestBody Producto entity) {
         return repository.save(entity);
     }
 
+    // Busca detalles de un producto específico por su ID
     @GetMapping("/{id}")
     public ResponseEntity<Producto> getById(@PathVariable Long id) {
         return repository.findById(id).map(ResponseEntity::ok)
                          .orElse(ResponseEntity.notFound().build());
     }
 
+    // Modifica o actualiza la información de un producto existente
     @PutMapping("/{id}")
     public ResponseEntity<Producto> update(@PathVariable Long id, @RequestBody Producto details) {
         return repository.findById(id).map(entity -> {
@@ -43,6 +47,7 @@ public class ProductoController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    // Elimina un producto del catálogo por su ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if(repository.existsById(id)) {
