@@ -66,3 +66,20 @@ Actualmente, la comercialización en línea de helados pre envasados carece de u
 - **Swagger (Springdoc)**: Usado como herramienta de documentación interactiva que facilita la exploración y pruebas de nuestra API.
 ## Diseño de la base de datos
 ![WhatsApp Image 2026-03-11 at 4 16 17 PM](https://github.com/user-attachments/assets/b1774565-eef8-492f-bfa4-a39290448fca)
+
+
+///crear usuario en la DB para ingresar a cada rol
+
+sudo -u postgres psql -d heladeria
+
+-- Admin (tú / el equipo)
+INSERT INTO usuarios (nombre, email, contrasena, telefono, direccion, rol)
+VALUES ('Administrador', 'admin@heladeria.com', '1234', '3001234567', 'Bucaramanga', 'ADMIN');
+
+-- Cliente de prueba
+INSERT INTO usuarios (nombre, email, contrasena, telefono, direccion, rol)
+VALUES ('Juan Cliente', 'juan@gmail.com', '1234', '3109876543', 'Bucaramanga', 'CLIENTE');
+
+-- Empleado de prueba
+INSERT INTO usuarios (nombre, email, contrasena, telefono, direccion, rol)
+VALUES ('María Empleada', 'maria@heladeria.com', '1234', '3201112233', 'Bucaramanga', 'EMPLEADO');
