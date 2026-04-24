@@ -254,6 +254,24 @@ tbody td{padding:.85rem 1.25rem;font-size:.875rem;color:var(--mid);vertical-alig
     <div class="field"><label for="login-email">Correo electrónico</label><input type="email" id="login-email" placeholder="correo@ejemplo.com" autocomplete="username"/></div>
     <div class="field"><label for="login-pass">Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/></div>
     <button class="btn-primary" id="login-btn" onclick="handleLogin()"><span id="login-btn-text">Iniciar sesión</span></button>
+    
+    <div style="text-align: center; margin-top: 1rem; margin-bottom: -0.5rem; font-size: 0.85rem;">
+      <span style="color: rgba(255,255,255,.6);">¿No tienes cuenta? <a href="javascript:void(0)" onclick="toggleRegisterForm()" style="color: var(--coral); font-weight: bold; text-decoration: none;">Crea una aquí</a></span>
+    </div>
+
+    <!-- REGISTER FORM (Hidden by default) -->
+    <div id="register-container" style="display: none; border-top: 1px solid rgba(255,255,255,.1); margin-top: 1.5rem; padding-top: 1.5rem;">
+      <h3 style="color: white; font-family: 'Syne'; margin-bottom: 1rem; text-align: center;">Crear Nueva Cuenta</h3>
+      <div class="alert error" id="register-alert"></div>
+      <div class="field"><label for="reg-nombre">Nombre Completo</label><input type="text" id="reg-nombre" placeholder="Ej. Juan Pérez"/></div>
+      <div class="field"><label for="reg-telefono">Teléfono</label><input type="text" id="reg-telefono" placeholder="Ej. 3001234567"/></div>
+      <div class="field"><label for="reg-direccion">Dirección</label><input type="text" id="reg-direccion" placeholder="Ej. Calle 123"/></div>
+      <div class="field"><label for="reg-email">Correo electrónico</label><input type="email" id="reg-email" placeholder="correo@ejemplo.com"/></div>
+      <div class="field"><label for="reg-pass">Contraseña</label><input type="password" id="reg-pass" placeholder="••••••••"/></div>
+      
+      <button class="btn-primary" id="reg-btn" style="background: linear-gradient(135deg,var(--teal),var(--teal-d));" onclick="handleRegister()"><span id="reg-btn-text">Registrarse</span></button>
+    </div>
+
     <div class="login-footer">Universidad Industrial de Santander · Proyecto Entornos</div>
   </div>
 </div>
@@ -475,6 +493,72 @@ async function handleLogin(){
   }catch(e){alertEl.textContent=e.message||'Credenciales inválidas.';alertEl.classList.add('show');}
   finally{btn.disabled=false;document.getElementById('login-btn-text').textContent='Iniciar sesión';}
 }
+
+// ===== REGISTER =====
+function toggleRegisterForm() {
+  const container = document.getElementById('register-container');
+  if (container.style.display === 'none') {
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+async function handleRegister() {
+  const nombre = document.getElementById('reg-nombre').value.trim();
+  const telefono = document.getElementById('reg-telefono').value.trim();
+  const direccion = document.getElementById('reg-direccion').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const alertEl = document.getElementById('register-alert');
+  const btn = document.getElementById('reg-btn');
+
+  if(!nombre || !telefono || !direccion || !email || !pass) {
+    alertEl.textContent = '❌ Todos los campos son obligatorios';
+    alertEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  document.getElementById('reg-btn-text').textContent = 'Creando...';
+  alertEl.classList.remove('show');
+
+  try {
+    const data = await apiFetch('/usuarios', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: nombre,
+        telefono: telefono,
+        direccion: direccion,
+        email: email,
+        contrasena: pass,
+        rol: 'CLIENTE' // Por defecto se crean como cliente
+      })
+    });
+
+    alertEl.classList.remove('show');
+    alertEl.classList.remove('error');
+    alert("¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.");
+    
+    document.getElementById('login-email').value = email;
+    document.getElementById('login-pass').value = pass;
+    toggleRegisterForm();
+
+  } catch(e) {
+    alertEl.classList.add('error');
+    alertEl.textContent = '❌ ' + (e.message || 'Ocurrió un error al crear la cuenta');
+    alertEl.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('reg-btn-text').textContent = 'Registrarse';
+    document.getElementById('reg-nombre').value = '';
+    document.getElementById('reg-telefono').value = '';
+    document.getElementById('reg-direccion').value = '';
+    document.getElementById('reg-email').value = '';
+    document.getElementById('reg-pass').value = '';
+  }
+}
+
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin()});
 
 // ===== DASHBOARD =====
