@@ -1,35 +1,25 @@
 package com.uis.heladeria.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.Data;
 
-@Entity
-@Table(name = "productos")
+@Document(collection = "productos")
 @Data
 public class Producto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    private Long idProducto;
 
-    @ManyToOne
-    @JoinColumn(name = "id_marca")
+    @Id
+    private String idProducto;      // String en MongoDB (era Long)
+
+    // En MongoDB se anida el objeto directamente como subdocumento.
+    // Cuando crees/edites un producto envías: { "marca": { "idMarca": "abc123" } }
     private Marca marca;
-    
-    @Column(columnDefinition = "TEXT")
-    private String imagen;
 
     private String nombre;
     private String descripcion;
     private Double precio;
     private Integer stock;
     private String presentacion;
+    private String imagen;          // Base64 de la imagen
 }

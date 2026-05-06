@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.5'
+	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -18,9 +18,10 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
 	// Spring Security (necesario para JWT)
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -30,7 +31,7 @@ dependencies {
 	runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-	runtimeOnly 'org.postgresql:postgresql'
+	
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'

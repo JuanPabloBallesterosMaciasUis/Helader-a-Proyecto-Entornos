@@ -2,33 +2,23 @@ package com.uis.heladeria.model;
 
 import java.util.Date;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.Data;
 
-@Entity
-@Table(name = "pedidos")
+@Document(collection = "pedidos")
 @Data
 public class Pedido {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idPedido;
 
-    @ManyToOne
-    @JoinColumn(name = "id_usuario")
+    @Id
+    private String idPedido;        // String en MongoDB (era Long)
+
+    // Usuario anidado como subdocumento
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "id_empleado")
-    private Empleado empleado;
-
     private Date fechaPedido;
-    private String estado;
+    private String estado;          // PENDIENTE, DESPACHADO
     private Double total;
     private String direccionEntrega;
 }

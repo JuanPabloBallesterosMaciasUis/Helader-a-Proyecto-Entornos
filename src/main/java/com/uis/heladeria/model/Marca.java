@@ -1,16 +1,16 @@
 package com.uis.heladeria.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "marcas")
+import lombok.Data;
+
+@Document(collection = "marcas")
 @Data
 public class Marca {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idMarca;
+    private String idMarca;         // String en MongoDB (era Long)
 
     private String nombre;
     private String pais;

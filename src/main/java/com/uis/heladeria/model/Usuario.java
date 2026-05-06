@@ -1,20 +1,23 @@
 package com.uis.heladeria.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "usuarios")
-@Data
+import lombok.Data;
+
+@Document(collection = "usuarios")
+@Data                          // ← esto genera todos los getters y setters
 public class Usuario {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-    private Long idUsuario;
+    private String id;
 
     private String nombre;
+
+    @Indexed(unique = true)
     private String email;
+
     private String contrasena;
     private String telefono;
     private String direccion;

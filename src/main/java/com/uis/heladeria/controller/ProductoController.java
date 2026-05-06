@@ -28,14 +28,14 @@ public class ProductoController {
 
     // Busca detalles de un producto específico por su ID
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> getById(@PathVariable Long id) {
+    public ResponseEntity<Producto> getById(@PathVariable String id) {
         return repository.findById(id).map(ResponseEntity::ok)
-                         .orElse(ResponseEntity.notFound().build());
+                    .orElse(ResponseEntity.notFound().build());
     }
 
     // Modifica o actualiza la información de un producto existente
     @PutMapping("/{id}")
-    public ResponseEntity<Producto> update(@PathVariable Long id, @RequestBody Producto details) {
+    public ResponseEntity<Producto> update(@PathVariable String id, @RequestBody Producto details) {
         return repository.findById(id).map(entity -> {
             entity.setNombre(details.getNombre());
             entity.setDescripcion(details.getDescripcion());
@@ -49,7 +49,7 @@ public class ProductoController {
 
     // Elimina un producto del catálogo por su ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable String id) {
         if(repository.existsById(id)) {
             repository.deleteById(id);
             return ResponseEntity.ok().build();

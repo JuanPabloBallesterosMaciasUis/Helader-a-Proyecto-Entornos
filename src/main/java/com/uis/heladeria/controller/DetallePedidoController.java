@@ -32,7 +32,7 @@ public class DetallePedidoController {
 
     // Detalles de un pedido específico
     @GetMapping("/pedido/{idPedido}")
-    public List<DetallePedido> getByPedido(@PathVariable Long idPedido) {
+    public List<DetallePedido> getByPedido(@PathVariable String idPedido) {
         return repository.findByPedido_IdPedido(idPedido);
     }
 
@@ -44,7 +44,7 @@ public class DetallePedidoController {
 
     // Obtiene un detalle por ID
     @GetMapping("/{id}")
-    public ResponseEntity<DetallePedido> getById(@PathVariable Long id) {
+    public ResponseEntity<DetallePedido> getById(@PathVariable String id) {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -52,7 +52,7 @@ public class DetallePedidoController {
 
     // Elimina un detalle
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable String id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return ResponseEntity.ok().build();

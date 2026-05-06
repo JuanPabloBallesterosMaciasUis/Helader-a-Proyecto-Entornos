@@ -1,85 +1,372 @@
-# Helader-a-Proyecto-Entornos
+# 🍦 FrostHub — Plataforma de Gestión de Helados
 
-**Plataforma de Gestión de Pedidos de Helados**
+**Universidad Industrial de Santander · Proyecto Entornos de Programación**
 
-**Estudiantes**
-* Juan Pablo Ballesteros Macías - 2224649
-* Neiber Hernando Zipasuca Soto – 2214004
-* Diego Andrés Barragán Ruiz - 2211827
+| Estudiante | Código |
+|---|---|
+| Juan Pablo Ballesteros Macías | 2224649 |
+| Neiber Hernando Zipasuca Soto | 2214004 |
+| Diego Andrés Barragán Ruiz | 2211827 |
 
-**Docente**
-Carlos Adolfo Beltrán Castro
+**Docente:** Carlos Adolfo Beltrán Castro
 
-**Universidad Industrial de Santander**
-Bucaramanga, Santander
+---
 
-## Temática
-El proyecto consiste en desarrollar un software enfocado en la gestión de pedidos de productos de helados pre empacados de distintas marcas. A diferencia de una heladería tradicional, el modelo se centra en la distribución de productos ya fabricados por empresas como Crem Helado, Colombina y otras, integrando su oferta en una misma plataforma. La idea es reunir en un solo sitio un catálogo con diferentes presentaciones, desde unidades individuales hasta paquetes familiares, y permitir que el usuario combine productos de varias marcas en un mismo pedido. El sistema estará organizado de manera estructurada para facilitar la consulta del inventario, la selección de productos y la gestión de órdenes, tanto para compras individuales como para pedidos de mayor volumen.
+##  Descripción del Proyecto
 
-## Justificación y/o Pertinencia de la Temática
-En los últimos años, la forma en que las personas compran productos ha cambiado con el crecimiento de los medios digitales. Muchas personas buscan opciones que les permitan consultar disponibilidad, comparar marcas y realizar pedidos desde un mismo sitio. Sin embargo, en el caso de los helados pre envasados, la oferta en línea suele estar dispersa, ya que cada marca o establecimiento maneja su propio medio, lo que obliga al cliente a revisar varias plataformas para completar una compra.
+FrostHub es una plataforma FullStack para la gestión de pedidos de helados pre-empacados de distintas marcas (Crem Helado, Colombina, entre otras). Centraliza en un solo sitio el catálogo de productos, la gestión de usuarios y el seguimiento de pedidos, permitiendo combinar productos de varias marcas en un mismo pedido.
 
-Este proyecto propone centralizar en una única plataforma el catálogo de helados pre empacados de múltiples marcas reconocidas, facilitando la experiencia del usuario y optimizando la gestión de pedidos tanto para compradores individuales como para distribuidores mayoristas.
+---
 
-## Mundo del Problema
-Actualmente, la comercialización en línea de helados pre envasados carece de una plataforma unificada que integre el portafolio de distintas marcas. Los usuarios interesados en comparar precios, presentaciones o disponibilidad de productos de marcas como Crem Helado y Colombina se ven obligados a visitar múltiples canales digitales o físicos, lo que genera una experiencia fragmentada e ineficiente. Adicionalmente, quienes realizan pedidos de mayor volumen no cuentan con una herramienta centralizada para gestionar órdenes multimarca de manera ágil. Para atender estas necesidades operativas, el sistema contempla la figura de un Empleado que actúa como intermediario entre la plataforma y los procesos internos de despacho y seguimiento de pedidos.
+##  Arquitectura General
 
-## Requerimientos Funcionales
-- RF1: Registro de usuarios en la plataforma.
-- RF2: Autenticación y control de acceso al sistema.
-- RF3: Gestión de proveedores y marcas de helados.
-- RF4: Administración del catálogo de productos.
-- RF5: Búsqueda y filtrado avanzado de helados.
-- RF6: Gestión del carrito de compras multimarca.
-- RF7: Procesamiento y creación de órdenes de pedido.
-- RF8: Gestión operativa de pedidos por parte del Empleado.
-- RF9: Control de acceso diferenciado por rol.
+```
+┌─────────────────────────────────────────────────────────┐
+│                      CLIENTE                            │
+│              React + Vite (puerto 5173)                 │
+│   LoginPage  ──►  Dashboard  ──►  UsuariosPage (CRUD)   │
+└──────────────────────┬──────────────────────────────────┘
+                       │  HTTP + JWT (Bearer Token)
+                       │  Proxy Vite → /api/*
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                     BACKEND                             │
+│           Spring Boot 3.4.1 (puerto 8083)               │
+│                                                         │
+│  AuthController   UsuarioController   PedidoController  │
+│       │                  │                  │           │
+│  JwtUtil + JwtFilter  (Spring Security)                 │
+└──────────────────────┬──────────────────────────────────┘
+                       │  MongoDB Java Driver 5.2.1
+                       │  SRV Connection (SSL/TLS)
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                  BASE DE DATOS                          │
+│          MongoDB Atlas (us-east-1) · Free Tier          │
+│     Cluster MO · Replica Set 3 nodos · v8.0.23          │
+│                                                         │
+│  Colecciones: usuarios · pedidos · productos · marcas   │
+│               detallesPedidos · empleados               │
+└─────────────────────────────────────────────────────────┘
+```
 
-## Requerimientos No Funcionales
-- La plataforma debe ser intuitiva y fácil de usar para todo tipo de usuarios, incluyendo empleados sin experiencia técnica avanzada.
-- La interfaz debe ser responsiva y funcionar correctamente en dispositivos móviles, tabletas y computadoras de escritorio.
-- Los datos personales y de pago de los usuarios deben almacenarse de forma segura, cumpliendo estándares de protección de datos.
-- El sistema debe garantizar una disponibilidad del 99% del tiempo para no interrumpir el proceso de compra ni la gestión operativa de pedidos.
-- El catálogo de productos y el estado de los pedidos deben actualizarse en tiempo real para reflejar cambios de inventario y avance en el despacho.
-- Los tiempos de respuesta del sistema no deben superar los 3 segundos en operaciones de búsqueda, filtrado y actualización de estado de pedidos.
-- El sistema de control de acceso por rol debe garantizar que ningún empleado pueda ejecutar acciones reservadas al administrador.
+---
 
-## Evidencia de Historias de Usuario
+## 🗄️ Modelo de Datos (Colecciones MongoDB)
 
-| Identificador de la historia | Rol | Característica / Funcionalidad | Razón / Resultado |
-| :-: | :-: | :-: | :-: |
-| HU-001 | Como administrador | Necesito autenticar mi acceso con credenciales seguras. | Para proteger la plataforma de accesos no autorizados. |
-| HU-002 | Como administrador | Necesito registrar y administrar las marcas de helados. | Para mantener actualizado el catálogo marcas en la plataforma. |
-| HU-003 | Como administrador | Necesito agregar, editar o eliminar productos del catálogo. | Para mantener la oferta de helados actualizada y precisa. |
-| HU-004 | Como cliente | Quiero registrarme e iniciar sesión en la plataforma. | Para tener un perfil personalizado y acceder a mis pedidos. |
-| HU-005 | Como cliente | Quiero buscar y filtrar helados por marca, presentación y precio. | Para encontrar rápidamente los productos que necesito. |
-| HU-006 | Como cliente | Quiero agregar productos de diferentes marcas a un carrito de compras. | Para hacer un solo pedido combinando varias marcas. |
-| HU-007 | Como cliente | Quiero confirmar y procesar mi orden de pedido. | Para formalizar mi compra y recibir confirmación del pedido. |
-| HU-008 | Como empleado | Necesito autenticarme con mis credenciales para acceder al módulo operativo. | Para garantizar que solo personal autorizado gestione los pedidos. |
-| HU-009 | Como empleado | Necesito visualizar todos los pedidos activos con su detalle (productos, marcas, cantidades y datos del cliente). | Para conocer qué pedidos debo atender y en qué orden de prioridad. |
-| HU-010 | Como empleado | Necesito actualizar el estado de un pedido (pendiente, en preparación, despachado, entregado). | Para reflejar el avance real del proceso de despacho en la plataforma. |
-| HU-013 | Como empleado | Necesito consultar el catálogo de productos en modo lectura para verificar disponibilidad. | Para confirmar si un producto solicitado tiene stock antes de preparar el despacho. |
+### Colección: `usuarios`
+```json
+{
+  "_id": "ObjectId",
+  "nombre": "string",
+  "email": "string (único)",
+  "contrasena": "string (BCrypt hash)",
+  "telefono": "string",
+  "direccion": "string",
+  "rol": "ADMIN | EMPLEADO | CLIENTE"
+}
+```
 
-## Herramientas Utilizadas
-- **PostgreSQL**: Se utilizó como Sistema de Gestión de Bases de Datos Relacional (RDBMS) para crear las tablas, organizar la estructura persistente de la aplicación y garantizar la integridad de información crítica como usuarios, marcas, productos y pedidos.
-- **Spring Boot**: Utilizado como el Framework principal en lenguaje Java para construir rápidamente el Backend de nuestro aplicativo.
-- **Swagger (Springdoc)**: Usado como herramienta de documentación interactiva que facilita la exploración y pruebas de nuestra API.
-## Diseño de la base de datos
-![WhatsApp Image 2026-03-11 at 4 16 17 PM](https://github.com/user-attachments/assets/b1774565-eef8-492f-bfa4-a39290448fca)
+### Colección: `pedidos`
+```json
+{
+  "_id": "ObjectId",
+  "usuario": { /* subdocumento Usuario */ },
+  "fechaPedido": "Date",
+  "estado": "PENDIENTE | DESPACHADO",
+  "total": "Double",
+  "direccionEntrega": "string"
+}
+```
+
+### Colección: `productos`
+```json
+{
+  "_id": "ObjectId",
+  "nombre": "string",
+  "descripcion": "string",
+  "precio": "Double",
+  "stock": "Integer",
+  "marca": { /* subdocumento Marca */ }
+}
+```
+
+### Colección: `marcas`
+```json
+{
+  "_id": "ObjectId",
+  "nombre": "string",
+  "paisOrigen": "string"
+}
+```
+
+---
+
+##  Flujo de Autenticación JWT
+
+```
+Usuario                 Frontend                  Backend              MongoDB
+   │                       │                         │                    │
+   │── email + contraseña ─►│                         │                    │
+   │                       │── POST /api/auth/login ─►│                    │
+   │                       │                         │── findByEmail() ──►│
+   │                       │                         │◄── Usuario ────────│
+   │                       │                         │                    │
+   │                       │                         │ BCrypt.matches()   │
+   │                       │                         │ generateToken()    │
+   │                       │◄── { token, usuario } ──│                    │
+   │                       │                         │                    │
+   │                       │ localStorage.setItem()  │                    │
+   │◄── Dashboard ─────────│                         │                    │
+   │                       │                         │                    │
+   │── solicitud CRUD ─────►│                         │                    │
+   │                       │── Authorization: Bearer TOKEN ──────────────►│
+   │                       │   JwtFilter valida token │                    │
+   │                       │◄── respuesta ───────────│                    │
+```
+
+---
+
+##  Flujo CRUD de Usuarios
+
+```
+Frontend (UsuariosPage)              Backend (UsuarioController)
+         │                                      │
+         │── GET  /api/usuarios ───────────────►│ findAll()
+         │◄── Lista de usuarios ────────────────│
+         │                                      │
+         │── POST /api/usuarios ───────────────►│ save(usuario)
+         │   { nombre, email, contrasena... }   │ verifica email único
+         │◄── Usuario creado ──────────────────│
+         │                                      │
+         │── PUT  /api/usuarios/{id} ──────────►│ findById → actualiza
+         │   { campos a actualizar }            │ save()
+         │◄── Usuario actualizado ─────────────│
+         │                                      │
+         │── DELETE /api/usuarios/{id} ────────►│ deleteById()
+         │◄── 200 OK ──────────────────────────│
+```
+
+---
+
+##  Control de Acceso por Roles
+
+| Endpoint | ADMIN | EMPLEADO | CLIENTE | Público |
+|---|:---:|:---:|:---:|:---:|
+| `POST /api/auth/login` | ✅ | ✅ | ✅ | ✅ |
+| `POST /api/usuarios` (registro) | ✅ | ✅ | ✅ | ✅ |
+| `GET /api/usuarios` (listar todos) | ✅ | ❌ | ❌ | ❌ |
+| `PUT /api/usuarios/{id}` | ✅ | ✅ | ✅ | ❌ |
+| `DELETE /api/usuarios/{id}` | ✅ | ❌ | ❌ | ❌ |
+| `GET /api/pedidos/**` | ✅ | ✅ | ✅ | ❌ |
+| `GET /api/productos/**` | ✅ | ✅ | ✅ | ❌ |
+
+---
+
+##  Estructura del Proyecto
+
+```
+Helader-a-Proyecto-Entornos/
+│
+├── src/main/java/com/uis/heladeria/
+│   ├── HeladeriaApplication.java       ← Arranque + usuario admin inicial
+│   ├── controller/
+│   │   ├── AuthController.java         ← POST /api/auth/login
+│   │   ├── UsuarioController.java      ← CRUD /api/usuarios
+│   │   ├── PedidoController.java       ← CRUD /api/pedidos
+│   │   ├── ProductoController.java     ← CRUD /api/productos
+│   │   ├── MarcaController.java        ← CRUD /api/marcas
+│   │   └── DetallePedidoController.java
+│   ├── model/
+│   │   ├── Usuario.java
+│   │   ├── Pedido.java
+│   │   ├── Producto.java
+│   │   ├── Marca.java
+│   │   ├── DetallePedido.java
+│   │   └── Empleado.java
+│   ├── repository/                     ← Interfaces MongoRepository
+│   └── security/
+│       ├── JwtUtil.java                ← Genera y valida tokens
+│       ├── JwtFilter.java              ← Intercepta cada request
+│       └── SecurityConfig.java         ← Reglas de acceso + BCrypt
+│
+├── src/main/resources/
+│   └── application.properties          ← MongoDB URI, puerto, JWT secret
+│
+└── frontend/
+    ├── index.html                      ← Entry point HTML
+    ├── vite.config.js                  ← Proxy /api → localhost:8083
+    └── src/
+        ├── main.jsx                    ← ReactDOM.createRoot
+        ├── App.jsx                     ← Rutas: / y /dashboard/*
+        ├── api.js                      ← apiFetch + manejo de token JWT
+        ├── index.css                   ← Estilos globales + variables CSS
+        ├── pages/
+        │   ├── LoginPage.jsx           ← Login + Registro de cuenta
+        │   └── UsuariosPage.jsx        ← Tabla + Modal CRUD usuarios
+        └── hooks/
+            └── useToast.jsx            ← Hook para notificaciones toast
+```
+
+---
+
+##  Pasos para Ejecutar el Proyecto
+
+### Requisitos previos
+- Java 17
+- Gradle (incluido con `./gradlew`)
+- Node.js 18+ y npm
+
+### 1. Clonar y configurar
+```bash
+git clone <url-del-repositorio>
+cd Helader-a-Proyecto-Entornos
+```
+
+### 2. Configurar MongoDB Atlas
+Edita `src/main/resources/application.properties`:
+```properties
+spring.data.mongodb.uri=mongodb+srv://admin:TU_CONTRASEÑA@mo.gziuz8l.mongodb.net/heladeria?retryWrites=true&w=majority&appName=MO
+spring.data.mongodb.database=heladeria
+server.port=8083
+jwt.secret=frosthub-heladeria-uis-secret-key-2025
+```
+
+### 3. Arrancar el backend
+```bash
+./gradlew bootRun
+```
+Al arrancar por primera vez crea automáticamente el usuario administrador:
+- **Email:** `admin@heladeria.com`
+- **Contraseña:** `1234`
+
+{
+  "nombre": "Admin Principal",
+  "email": "admin@heladeria.com",
+  "contrasena": "$2a$10$Xl0yhvzLIaJjzeGR8di7..uXQOKPWWEPn5e8qSXkRJHYBMSHLBHqS",
+  "telefono": "3001234567",
+  "direccion": "Bucaramanga",
+  "rol": "ADMIN"
+}
+contrasena 1234 encriptada con 10 rounds
+
+### 4. Arrancar el frontend (nueva terminal)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 5. Abrir en el navegador
+```
+http://localhost:5173
+```
+
+---
+
+##  Guía de Pruebas
+
+### Prueba 1 — Login exitoso
+1. Ir a `http://localhost:5173`
+2. Ingresar email: `admin@heladeria.com` / contraseña: `admin123`
+3. Resultado esperado: redirige al Dashboard con bienvenida y rol **ADMIN**
+![alt text](image.png)
+![alt text](image-1.png)
+
+### Prueba 2 — Registro de nuevo usuario
+1. En la pantalla de login, clic en ** Crear cuenta**
+2. Llenar todos los campos (nombre, teléfono, dirección, email, contraseña)
+3. Resultado esperado: mensaje de éxito y vuelve a la pestaña de login
+![alt text](image-2.png)
+![alt text](image-3.png)
+
+### Prueba 3 — Listar usuarios (solo ADMIN)
+1. Loguearse como ADMIN
+2. Ir a ** Usuarios** en el menú
+3. Resultado esperado: tabla con todos los usuarios registrados en MongoDB
+![alt text](image-4.png)
+
+### Prueba 4 — Crear usuario desde el panel
+1. En la página de Usuarios, clic en **＋ Nuevo Usuario**
+2. Llenar el formulario en el modal
+3. Resultado esperado: toast verde "Usuario creado" y aparece en la tabla
+![alt text](image-5.png)
+![alt text](image-6.png)
+![alt text](image-7.png)
+
+### Prueba 5 — Editar usuario
+1. En la tabla, clic en ** Editar** en cualquier fila
+2. Modificar nombre o rol
+3. Resultado esperado: toast "Usuario actualizado" y cambio reflejado
+![alt text](image-8.png)
+![alt text](image-9.png)
+![alt text](image-10.png)
 
 
-///crear usuario en la DB para ingresar a cada rol
 
-sudo -u postgres psql -d heladeria
+### Prueba 6 — Eliminar usuario (solo ADMIN)
+1. Clic en ** Borrar** en cualquier usuario
+2. Confirmar el diálogo
+3. Resultado esperado: usuario desaparece de la tabla
+![alt text](image-11.png)
+![alt text](image-12.png)
+![alt text](image-13.png)
 
--- Admin (tú / el equipo)
-INSERT INTO usuarios (nombre, email, contrasena, telefono, direccion, rol)
-VALUES ('Administrador', 'admin@heladeria.com', '1234', '3001234567', 'Bucaramanga', 'ADMIN');
+### Prueba 7 — Protección de rutas
+1. Sin estar logueado, intentar entrar a `http://localhost:5173/dashboard`
+2. Resultado esperado: redirige automáticamente a la pantalla de login
+![alt text](image-14.png)
+![alt text](image-15.png)
+---
 
--- Cliente de prueba
-INSERT INTO usuarios (nombre, email, contrasena, telefono, direccion, rol)
-VALUES ('Juan Cliente', 'juan@gmail.com', '1234', '3109876543', 'Bucaramanga', 'CLIENTE');
+##  Tecnologías Utilizadas
 
--- Empleado de prueba
-INSERT INTO usuarios (nombre, email, contrasena, telefono, direccion, rol)
-VALUES ('María Empleada', 'maria@heladeria.com', '1234', '3201112233', 'Bucaramanga', 'EMPLEADO');
+| Capa | Tecnología | Versión |
+|---|---|---|
+| Frontend | React | 18.3.1 |
+| Frontend | Vite | 5.3.1 |
+| Frontend | React Router DOM | 6.23.1 |
+| Backend | Spring Boot | 3.4.1 |
+| Backend | Spring Security | 6.x |
+| Backend | Spring Data MongoDB | 4.4.1 |
+| Backend | jjwt (JWT) | 0.12.6 |
+| Backend | Lombok | latest |
+| Backend | Springdoc OpenAPI (Swagger) | 2.3.0 |
+| Base de datos | MongoDB Atlas | 8.0.23 |
+| Build | Gradle | 9.4.1 |
+| Lenguaje Backend | Java | 17 |
+
+---
+
+##  Endpoints Disponibles
+
+### Autenticación
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | `/api/auth/login` | Login → retorna JWT |
+| GET | `/api/auth/verificar` | Valida token activo |
+
+### Usuarios
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/api/usuarios` | Listar todos (ADMIN) |
+| GET | `/api/usuarios/{id}` | Obtener por ID |
+| POST | `/api/usuarios` | Crear usuario |
+| PUT | `/api/usuarios/{id}` | Actualizar usuario |
+| DELETE | `/api/usuarios/{id}` | Eliminar (ADMIN) |
+
+### Documentación Swagger
+Disponible en: `http://localhost:8083/swagger-ui/index.html`
+
+---
+
+##  Requerimientos Funcionales Implementados
+
+- ✅ **RF1** Registro de usuarios en la plataforma
+- ✅ **RF2** Autenticación y control de acceso con JWT
+- ✅ **RF3** Gestión de roles (ADMIN, EMPLEADO, CLIENTE)
+- ✅ **RF4** CRUD completo de usuarios desde el frontend
+- ✅ **RF5** Protección de rutas por rol en backend (Spring Security)
+- ✅ **RF6** Protección de rutas en frontend (ProtectedRoute)
+- ✅ **RF7** Conexión a base de datos en la nube (MongoDB Atlas)
+- ✅ **RF8** Búsqueda/filtrado de usuarios en tiempo real

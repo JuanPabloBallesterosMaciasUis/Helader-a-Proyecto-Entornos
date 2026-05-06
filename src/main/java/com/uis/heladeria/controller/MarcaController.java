@@ -28,14 +28,14 @@ public class MarcaController {
 
     // Busca una marca específica por su ID
     @GetMapping("/{id}")
-    public ResponseEntity<Marca> getById(@PathVariable Long id) {
+    public ResponseEntity<Marca> getById(@PathVariable String id) {
         return repository.findById(id).map(ResponseEntity::ok)
                          .orElse(ResponseEntity.notFound().build());
     }
 
     // Actualiza los datos de una marca existente
     @PutMapping("/{id}")
-    public ResponseEntity<Marca> update(@PathVariable Long id, @RequestBody Marca details) {
+    public ResponseEntity<Marca> update(@PathVariable String id, @RequestBody Marca details) {
         return repository.findById(id).map(entity -> {
             entity.setNombre(details.getNombre());
             entity.setPais(details.getPais());
@@ -47,7 +47,7 @@ public class MarcaController {
 
     // Elimina una marca por su ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable String id) {
         if(repository.existsById(id)) {
             repository.deleteById(id);
             return ResponseEntity.ok().build();

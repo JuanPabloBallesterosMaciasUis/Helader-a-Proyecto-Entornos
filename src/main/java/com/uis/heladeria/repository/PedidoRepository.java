@@ -2,18 +2,18 @@ package com.uis.heladeria.repository;
 
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.uis.heladeria.model.Pedido;
 
-public interface PedidoRepository extends JpaRepository<Pedido, Long> {
+public interface PedidoRepository extends MongoRepository<Pedido, String> {
 
-    // Todos los pedidos de un usuario específico
-    List<Pedido> findByUsuario_IdUsuarioOrderByFechaPedidoDesc(Long idUsuario);
+    // Busca por el id del usuario anidado (el campo @Id en Usuario se llama "id")
+    List<Pedido> findByUsuario_IdOrderByFechaPedidoDesc(String id);
 
-    // Pedidos por estado (PENDIENTE, DESPACHADO)
+    // Pedidos por estado
     List<Pedido> findByEstadoOrderByFechaPedidoDesc(String estado);
 
-    // Todos los pedidos ordenados por fecha descendente
+    // Todos ordenados por fecha
     List<Pedido> findAllByOrderByFechaPedidoDesc();
 }

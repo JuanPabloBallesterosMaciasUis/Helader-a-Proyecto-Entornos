@@ -1,22 +1,19 @@
 package com.uis.heladeria.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.Data;
 
-@Entity
-@Table(name = "detalles_pedidos")
+@Document(collection = "detalles_pedidos")
 @Data
 public class DetallePedido {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idDetalle;
+    private String idDetalle;       // String en MongoDB (era Long)
 
-    @ManyToOne
-    @JoinColumn(name = "id_pedido")
+    // Pedido y Producto anidados como subdocumentos
     private Pedido pedido;
-
-    @ManyToOne
-    @JoinColumn(name = "id_producto")
     private Producto producto;
 
     private Integer cantidad;

@@ -1,7 +1,8 @@
 package com.uis.heladeria.repository;
+ 
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.uis.heladeria.model.Producto;
-
-public interface ProductoRepository extends JpaRepository<Producto, Long> {
+ 
+public interface ProductoRepository extends MongoRepository<Producto, String> {
 }

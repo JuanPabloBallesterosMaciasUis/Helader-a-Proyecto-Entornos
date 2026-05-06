@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,23 +27,26 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
-        String email     = credenciales.get("email");
+        String email      = credenciales.get("email");
         String contrasena = credenciales.get("contrasena");
 
-        Optional<Usuario> userOpt =
-                usuarioRepository.findByEmailAndContrasena(email, contrasena);
+        // Busca solo por email
+        Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
 
-        if (userOpt.isPresent()) {
+        // Verifica que exista Y que la contraseña coincida (BCrypt)
+        if (userOpt.isPresent() && passwordEncoder.matches(contrasena, userOpt.get().getContrasena())) {
             Usuario usuario = userOpt.get();
 
-            // Generar token JWT con email y rol
             String token = jwtUtil.generateToken(usuario.getEmail(), usuario.getRol());
 
             return ResponseEntity.ok(Map.of(
                 "message", "Login exitoso",
-                "token",   token,           // <-- nuevo: el frontend lo guarda
+                "token",   token,
                 "usuario", usuario
             ));
         }
@@ -51,7 +55,6 @@ public class AuthController {
                 .body(Map.of("error", "Credenciales inválidas"));
     }
 
-    /** Endpoint para verificar si un token sigue siendo válido */
     @GetMapping("/verificar")
     public ResponseEntity<?> verificar(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

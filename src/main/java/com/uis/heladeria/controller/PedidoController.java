@@ -35,8 +35,8 @@ public class PedidoController {
 
     // Pedidos de un usuario específico (para cliente)
     @GetMapping("/usuario/{idUsuario}")
-    public List<Pedido> getByUsuario(@PathVariable Long idUsuario) {
-        return repository.findByUsuario_IdUsuarioOrderByFechaPedidoDesc(idUsuario);
+    public List<Pedido> getByUsuario(@PathVariable String idUsuario) {
+        return repository.findByUsuario_IdOrderByFechaPedidoDesc(idUsuario);
     }
 
     // Pedidos filtrados por estado (PENDIENTE, DESPACHADO)
@@ -55,7 +55,7 @@ public class PedidoController {
 
     // Obtiene un pedido por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> getById(@PathVariable Long id) {
+    public ResponseEntity<Pedido> getById(@PathVariable String id) {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -64,7 +64,7 @@ public class PedidoController {
     // Empleado actualiza el estado del pedido (PENDIENTE → DESPACHADO)
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Pedido> updateEstado(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestBody Map<String, String> body) {
 
         String nuevoEstado = body.get("estado");
@@ -80,7 +80,7 @@ public class PedidoController {
 
     // Elimina un pedido (solo admin)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable String id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return ResponseEntity.ok().build();
