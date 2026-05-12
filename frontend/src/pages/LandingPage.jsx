@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getToken, publicFetch } from '../api';
+
+// URL del backend hardcodeada — funciona en producción sin variables de entorno
+const BACKEND = 'https://helader-a-proyecto-entornos.onrender.com';
 
 const fmtCOP = n => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0
@@ -197,15 +199,15 @@ export default function LandingPage() {
 
     async function fetchData() {
       try {
-        const [productos, marcas] = await Promise.all([
-          publicFetch('/productos'),
-          publicFetch('/marcas'),
+        const [resP, resM] = await Promise.all([
+          fetch(`${BACKEND}/api/productos`),
+          fetch(`${BACKEND}/api/marcas`),
         ]);
         if (cancelled) return;
-        setProductos(productos || []);
-        setMarcas(marcas || []);
+        if (resP.ok) setProductos(await resP.json());
+        if (resM.ok) setMarcas(await resM.json());
       } catch (e) {
-        // API no disponible — mostrar vacío sin crashear
+        // Backend no disponible — mostrar vacío sin crashear
       } finally {
         if (!cancelled) setLoading(false);
       }
