@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21
+FROM eclipse-temurin:17
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN chmod +x gradlew
 
-RUN ./gradlew build -x test
+RUN ./gradlew clean build -x test --no-daemon
 
 EXPOSE 8080
 
