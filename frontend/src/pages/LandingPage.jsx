@@ -198,9 +198,9 @@ export default function LandingPage() {
     async function fetchData() {
       try {
         const [resP, resM] = await Promise.all([
-          fetch('/api/productos'),
-          fetch('/api/marcas'),
-        ]);
+        fetch(`${import.meta.env.VITE_API_URL}/api/productos`),
+        fetch(`${import.meta.env.VITE_API_URL}/api/marcas`),
+      ]);
         if (cancelled) return;
         if (resP.ok) setProductos(await resP.json());
         if (resM.ok) setMarcas(await resM.json());
