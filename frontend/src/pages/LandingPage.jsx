@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getToken } from '../api';
+import { getToken, publicFetch } from '../api';
 
 const fmtCOP = n => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0
@@ -197,15 +197,15 @@ export default function LandingPage() {
 
     async function fetchData() {
       try {
-        const [resP, resM] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/api/productos`),
-        fetch(`${import.meta.env.VITE_API_URL}/api/marcas`),
-      ]);
+        const [productos, marcas] = await Promise.all([
+          publicFetch('/productos'),
+          publicFetch('/marcas'),
+        ]);
         if (cancelled) return;
-        if (resP.ok) setProductos(await resP.json());
-        if (resM.ok) setMarcas(await resM.json());
+        setProductos(productos || []);
+        setMarcas(marcas || []);
       } catch (e) {
-        // API no disponible — no hacer nada, mostrar vacío
+        // API no disponible — mostrar vacío sin crashear
       } finally {
         if (!cancelled) setLoading(false);
       }

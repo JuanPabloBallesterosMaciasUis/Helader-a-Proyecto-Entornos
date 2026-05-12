@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  'https://helader-a-proyecto-entornos.onrender.com';
 
 // Utilidades de token
 export const saveToken = t =>
@@ -19,6 +21,13 @@ export const getUser = () => {
   const s = localStorage.getItem('frosthub_user');
   return s ? JSON.parse(s) : null;
 };
+
+// Fetch público — sin token, para rutas abiertas como la landing
+export async function publicFetch(path) {
+  const res = await fetch(`${API_URL}/api${path}`);
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  return res.json();
+}
 
 // Fetch con JWT automático
 export async function apiFetch(path, opts = {}) {
