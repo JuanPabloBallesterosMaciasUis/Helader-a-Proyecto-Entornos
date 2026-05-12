@@ -18,7 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -29,53 +28,44 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Deshabilitar CSRF (usamos JWT, no sesiones)
             .csrf(AbstractHttpConfigurer::disable)
-
-            // Configurar CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-            // Sin sesiones en servidor (stateless)
-            .sessionManagement(sm ->
-                sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-            // Reglas de acceso por ruta
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
 
                 // ===== RUTAS PÚBLICAS =====
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/usuarios").permitAll()        // POST para registro
                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
 
-                // Swagger / OpenAPI (útil para presentación)
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**"
-                ).permitAll()
+                // Productos y marcas públicos (para la landing sin login)
+                .requestMatchers(HttpMethod.GET, "/api/productos").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/marcas").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/marcas/**").permitAll()
 
-                // Archivos estáticos del frontend (index.html, CSS, JS)
-                .requestMatchers(
-                    "/",
-                    "/index.html",
-                    "/*.js",
-                    "/*.css",
-                    "/*.ico"
-                ).permitAll()
+                // Swagger
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
-                // ===== RUTAS SOLO ADMIN =====
+                // Archivos estáticos
+                .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.ico").permitAll()
+
+                // ===== SOLO ADMIN =====
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET,    "/api/usuarios").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/marcas").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/marcas/**").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/marcas/**").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/productos").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAnyRole("ADMIN")
 
-                // ===== RUTAS ADMIN Y EMPLEADO =====
+                // ===== PEDIDOS: autenticados =====
                 .requestMatchers("/api/pedidos/**").hasAnyRole("ADMIN", "EMPLEADO", "CLIENTE")
                 .requestMatchers("/api/detalles-pedidos/**").hasAnyRole("ADMIN", "EMPLEADO", "CLIENTE")
 
-                // ===== RESTO: requiere autenticación =====
+                // ===== RESTO =====
                 .anyRequest().authenticated()
             )
-
-            // Insertar el filtro JWT antes del filtro de autenticación estándar
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -92,8 +82,9 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
     @Bean
-public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-}
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

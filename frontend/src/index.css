@@ -395,3 +395,7 @@ tbody td { padding: .85rem 1.25rem; font-size: .875rem; color: var(--mid); verti
   .form-grid .full { grid-column: 1; }
   .dash-body { padding: 1rem; }
 }
+
+.badge-stock-ok  { background: rgba(34,197,94,.12); color: #15803d; }
+.badge-stock-low { background: rgba(245,166,35,.12); color: #b37400; }
+.badge-stock-out { background: rgba(242,97,63,.12);  color: var(--coral); }
