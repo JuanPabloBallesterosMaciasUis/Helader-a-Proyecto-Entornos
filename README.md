@@ -1,103 +1,98 @@
-# 🍦 FrostHub — Plataforma de Gestión de Helados
+#  FrostHub — Plataforma de Gestión de Helados
 
-**Universidad Industrial de Santander · Proyecto Entornos de Programación**
+> **Proyecto FullStack · Universidad Industrial de Santander**  
+> Ingeniería de Sistemas · Curso de Entornos de Programación
 
-| Estudiante | Código |
+
+
+---
+
+##  Descripción
+
+**FrostHub** es una aplicación web FullStack para la gestión de una heladería de helados pre-empacados. Permite a los clientes explorar el catálogo, realizar pedidos con dirección de entrega y hacer seguimiento del estado. Los empleados gestionan y despachan pedidos, mientras que el administrador controla todo el sistema: usuarios, marcas, productos y pedidos.
+
+### 🌐 URLs de producción
+
+| Servicio | URL |
 |---|---|
-| Juan Pablo Ballesteros Macías | 2224649 |
-| Neiber Hernando Zipasuca Soto | 2214004 |
-| Diego Andrés Barragán Ruiz | 2211827 |
+| Frontend (Vercel) | https://heladeria-proyecto-entornos.vercel.app |
+| Backend API (Render) | https://helader-a-proyecto-entornos.onrender.com/api |
+| Swagger UI | https://helader-a-proyecto-entornos.onrender.com/swagger-ui/index.html |
 
-**Docente:** Carlos Adolfo Beltrán Castro
 
----
-
-##  Descripción del Proyecto
-
-FrostHub es una plataforma FullStack para la gestión de pedidos de helados pre-empacados de distintas marcas (Crem Helado, Colombina, entre otras). Centraliza en un solo sitio el catálogo de productos, la gestión de usuarios y el seguimiento de pedidos, permitiendo combinar productos de varias marcas en un mismo pedido.
 
 ---
 
-##  Arquitectura General
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                      CLIENTE                            │
-│              React + Vite (puerto 5173)                 │
-│   LoginPage  ──►  Dashboard  ──►  UsuariosPage (CRUD)   │
-└──────────────────────┬──────────────────────────────────┘
-                       │  HTTP + JWT (Bearer Token)
-                       │  Proxy Vite → /api/*
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│                     BACKEND                             │
-│           Spring Boot 3.4.1 (puerto 8083)               │
-│                                                         │
-│  AuthController   UsuarioController   PedidoController  │
-│       │                  │                  │           │
-│  JwtUtil + JwtFilter  (Spring Security)                 │
-└──────────────────────┬──────────────────────────────────┘
-                       │  MongoDB Java Driver 5.2.1
-                       │  SRV Connection (SSL/TLS)
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│                  BASE DE DATOS                          │
-│          MongoDB Atlas (us-east-1) · Free Tier          │
-│     Cluster MO · Replica Set 3 nodos · v8.0.23          │
-│                                                         │
-│  Colecciones: usuarios · pedidos · productos · marcas   │
-│               detallesPedidos · empleados               │
-└─────────────────────────────────────────────────────────┘
+
+**MongoDB:**
+```json
+// Un solo documento con todo incluido
+{
+  "_id": "64abc123ef456",
+  "nombre": "Juan Pérez",
+  "email": "juan@mail.com",
+  "rol": "CLIENTE",
+  "pedidos": [
+    { "total": 15000, "estado": "ENVIADO", "direccionEntrega": "Calle 45" }
+  ]
+}
 ```
 
 ---
 
-## 🗄️ Modelo de Datos (Colecciones MongoDB)
+##  Arquitectura del Sistema
 
-### Colección: `usuarios`
-```json
-{
-  "_id": "ObjectId",
-  "nombre": "string",
-  "email": "string (único)",
-  "contrasena": "string (BCrypt hash)",
-  "telefono": "string",
-  "direccion": "string",
-  "rol": "ADMIN | EMPLEADO | CLIENTE"
-}
 ```
-
-### Colección: `pedidos`
-```json
-{
-  "_id": "ObjectId",
-  "usuario": { /* subdocumento Usuario */ },
-  "fechaPedido": "Date",
-  "estado": "PENDIENTE | DESPACHADO",
-  "total": "Double",
-  "direccionEntrega": "string"
-}
-```
-
-### Colección: `productos`
-```json
-{
-  "_id": "ObjectId",
-  "nombre": "string",
-  "descripcion": "string",
-  "precio": "Double",
-  "stock": "Integer",
-  "marca": { /* subdocumento Marca */ }
-}
-```
-
-### Colección: `marcas`
-```json
-{
-  "_id": "ObjectId",
-  "nombre": "string",
-  "paisOrigen": "string"
-}
+┌─────────────────────────────────────────────────────────────┐
+│                    USUARIO FINAL                             │
+│         Navegador web (Chrome, Firefox, Safari)              │
+└────────────────────────┬────────────────────────────────────┘
+                         │ HTTPS
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│              FRONTEND — Vercel                               │
+│         React 18 + Vite + React Router v6                   │
+│                                                              │
+│  /                → LandingPage   (pública)                  │
+│  /login           → LoginPage     (pública)                  │
+│  /dashboard/*     → Panel según rol (protegido con JWT)      │
+│    ├── /catalogo  → CatalogoPage  (cliente)                  │
+│    ├── /pedidos   → PedidosPage   (cliente / empleado)       │
+│    ├── /usuarios  → UsuariosPage  (admin)                    │
+│    ├── /marcas    → MarcasPage    (admin)                    │
+│    └── /productos → ProductosPage (admin)                    │
+└────────────────────────┬────────────────────────────────────┘
+                         │ HTTP/REST + JWT Bearer Token
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│              BACKEND — Render                                │
+│         Spring Boot 4 · Java 17 · Puerto 8080               │
+│                                                              │
+│  POST /api/auth/login          → Genera JWT                  │
+│  GET  /api/productos           → Público (sin token)         │
+│  GET  /api/marcas              → Público (sin token)         │
+│  CRUD /api/usuarios            → Solo ADMIN                  │
+│  CRUD /api/marcas              → Solo ADMIN                  │
+│  CRUD /api/productos           → Solo ADMIN                  │
+│  CRUD /api/pedidos             → ADMIN + EMPLEADO + CLIENTE  │
+│  CRUD /api/detalles-pedidos    → ADMIN + EMPLEADO + CLIENTE  │
+│                                                              │
+│  Spring Security + JWT Filter + BCrypt                       │
+└────────────────────────┬────────────────────────────────────┘
+                         │ Spring Data MongoDB
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│              BASE DE DATOS — MongoDB Atlas (Nube)            │
+│         Cluster M0 Gratuito · Región: us-east-1             │
+│                                                              │
+│  Colecciones:                                                │
+│  ├── usuarios         (nombre, email, rol, dirección...)     │
+│  ├── marcas           (nombre, país, email, teléfono)        │
+│  ├── productos        (nombre, precio, stock, imagen...)     │
+│  ├── pedidos          (usuario, estado, total, dirección)    │
+│  └── detalles_pedidos (pedido, producto, cantidad, subtotal) │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -105,61 +100,22 @@ FrostHub es una plataforma FullStack para la gestión de pedidos de helados pre-
 ##  Flujo de Autenticación JWT
 
 ```
-Usuario                 Frontend                  Backend              MongoDB
-   │                       │                         │                    │
-   │── email + contraseña ─►│                         │                    │
-   │                       │── POST /api/auth/login ─►│                    │
-   │                       │                         │── findByEmail() ──►│
-   │                       │                         │◄── Usuario ────────│
-   │                       │                         │                    │
-   │                       │                         │ BCrypt.matches()   │
-   │                       │                         │ generateToken()    │
-   │                       │◄── { token, usuario } ──│                    │
-   │                       │                         │                    │
-   │                       │ localStorage.setItem()  │                    │
-   │◄── Dashboard ─────────│                         │                    │
-   │                       │                         │                    │
-   │── solicitud CRUD ─────►│                         │                    │
-   │                       │── Authorization: Bearer TOKEN ──────────────►│
-   │                       │   JwtFilter valida token │                    │
-   │                       │◄── respuesta ───────────│                    │
+Cliente                    Backend                    MongoDB
+   │                          │                          │
+   │── POST /api/auth/login ──▶│                          │
+   │   { email, contraseña }   │── findByEmailAndContr. ──▶│
+   │                          │◀─── Usuario encontrado ───│
+   │                          │─── genera JWT (24h) ──── │
+   │◀── { token, usuario } ───│                          │
+   │                          │                          │
+   │  Guarda token en         │                          │
+   │  localStorage            │                          │
+   │                          │                          │
+   │── GET /api/pedidos ──────▶│                          │
+   │   Authorization: Bearer  │── verifica JWT ──────────│
+   │   eyJhbGc...             │── findAll() ─────────────▶│
+   │◀── [ lista pedidos ] ────│◀── documentos ────────────│
 ```
-
----
-
-##  Flujo CRUD de Usuarios
-
-```
-Frontend (UsuariosPage)              Backend (UsuarioController)
-         │                                      │
-         │── GET  /api/usuarios ───────────────►│ findAll()
-         │◄── Lista de usuarios ────────────────│
-         │                                      │
-         │── POST /api/usuarios ───────────────►│ save(usuario)
-         │   { nombre, email, contrasena... }   │ verifica email único
-         │◄── Usuario creado ──────────────────│
-         │                                      │
-         │── PUT  /api/usuarios/{id} ──────────►│ findById → actualiza
-         │   { campos a actualizar }            │ save()
-         │◄── Usuario actualizado ─────────────│
-         │                                      │
-         │── DELETE /api/usuarios/{id} ────────►│ deleteById()
-         │◄── 200 OK ──────────────────────────│
-```
-
----
-
-##  Control de Acceso por Roles
-
-| Endpoint | ADMIN | EMPLEADO | CLIENTE | Público |
-|---|:---:|:---:|:---:|:---:|
-| `POST /api/auth/login` | ✅ | ✅ | ✅ | ✅ |
-| `POST /api/usuarios` (registro) | ✅ | ✅ | ✅ | ✅ |
-| `GET /api/usuarios` (listar todos) | ✅ | ❌ | ❌ | ❌ |
-| `PUT /api/usuarios/{id}` | ✅ | ✅ | ✅ | ❌ |
-| `DELETE /api/usuarios/{id}` | ✅ | ❌ | ❌ | ❌ |
-| `GET /api/pedidos/**` | ✅ | ✅ | ✅ | ❌ |
-| `GET /api/productos/**` | ✅ | ✅ | ✅ | ❌ |
 
 ---
 
@@ -168,205 +124,238 @@ Frontend (UsuariosPage)              Backend (UsuarioController)
 ```
 Helader-a-Proyecto-Entornos/
 │
-├── src/main/java/com/uis/heladeria/
-│   ├── HeladeriaApplication.java       ← Arranque + usuario admin inicial
-│   ├── controller/
-│   │   ├── AuthController.java         ← POST /api/auth/login
-│   │   ├── UsuarioController.java      ← CRUD /api/usuarios
-│   │   ├── PedidoController.java       ← CRUD /api/pedidos
-│   │   ├── ProductoController.java     ← CRUD /api/productos
-│   │   ├── MarcaController.java        ← CRUD /api/marcas
-│   │   └── DetallePedidoController.java
-│   ├── model/
-│   │   ├── Usuario.java
-│   │   ├── Pedido.java
-│   │   ├── Producto.java
-│   │   ├── Marca.java
-│   │   ├── DetallePedido.java
-│   │   └── Empleado.java
-│   ├── repository/                     ← Interfaces MongoRepository
-│   └── security/
-│       ├── JwtUtil.java                ← Genera y valida tokens
-│       ├── JwtFilter.java              ← Intercepta cada request
-│       └── SecurityConfig.java         ← Reglas de acceso + BCrypt
+├── frontend/                          ← React + Vite
+│   ├── src/
+│   │   ├── api.js                     ← apiFetch con JWT automático
+│   │   ├── App.jsx                    ← Rutas y layout por rol
+│   │   ├── main.jsx                   ← Entry point de React
+│   │   ├── index.css                  ← Estilos globales (variables CSS)
+│   │   ├── hooks/
+│   │   │   └── useToast.jsx           ← Hook de notificaciones
+│   │   └── pages/
+│   │       ├── LandingPage.jsx        ← Página pública con carrusel
+│   │       ├── LoginPage.jsx          ← Login + registro de cliente
+│   │       ├── CatalogoPage.jsx       ← Tienda con filtros y carrito
+│   │       ├── ProductosPage.jsx      ← CRUD de productos (admin)
+│   │       ├── MarcasPage.jsx         ← CRUD de marcas (admin)
+│   │       ├── UsuariosPage.jsx       ← CRUD de usuarios (admin)
+│   │       └── PedidosPage.jsx        ← Gestión pedidos (emp/cliente)
+│   ├── index.html
+│   ├── vite.config.js
+│   └── package.json
 │
-├── src/main/resources/
-│   └── application.properties          ← MongoDB URI, puerto, JWT secret
-│
-└── frontend/
-    ├── index.html                      ← Entry point HTML
-    ├── vite.config.js                  ← Proxy /api → localhost:8083
-    └── src/
-        ├── main.jsx                    ← ReactDOM.createRoot
-        ├── App.jsx                     ← Rutas: / y /dashboard/*
-        ├── api.js                      ← apiFetch + manejo de token JWT
-        ├── index.css                   ← Estilos globales + variables CSS
-        ├── pages/
-        │   ├── LoginPage.jsx           ← Login + Registro de cuenta
-        │   └── UsuariosPage.jsx        ← Tabla + Modal CRUD usuarios
-        └── hooks/
-            └── useToast.jsx            ← Hook para notificaciones toast
+└── src/main/java/com/uis/heladeria/  ← Spring Boot
+    ├── HeladeriaApplication.java      ← Main
+    ├── DataSeeder.java                ← Crea usuarios por defecto
+    ├── controller/
+    │   ├── AuthController.java        ← Login → JWT
+    │   ├── UsuarioController.java     ← CRUD usuarios
+    │   ├── MarcaController.java       ← CRUD marcas
+    │   ├── ProductoController.java    ← CRUD productos
+    │   ├── PedidoController.java      ← CRUD + cambio de estado
+    │   └── DetallePedidoController.java
+    ├── model/
+    │   ├── Usuario.java               ← @Document MongoDB
+    │   ├── Marca.java
+    │   ├── Producto.java
+    │   ├── Pedido.java
+    │   └── DetallePedido.java
+    ├── repository/
+    │   ├── UsuarioRepository.java     ← MongoRepository<Usuario, String>
+    │   ├── MarcaRepository.java
+    │   ├── ProductoRepository.java
+    │   ├── PedidoRepository.java
+    │   └── DetallePedidoRepository.java
+    └── security/
+        ├── JwtUtil.java               ← Genera y valida tokens
+        ├── JwtFilter.java             ← Filtro por cada request
+        └── SecurityConfig.java        ← Reglas de acceso por ruta
 ```
 
 ---
 
-##  Pasos para Ejecutar el Proyecto
+##  Roles y Permisos
+
+| Funcionalidad | Público | Cliente | Empleado | Admin |
+|---|:---:|:---:|:---:|:---:|
+| Ver landing page | ✅ | ✅ | ✅ | ✅ |
+| Ver catálogo de productos | ✅ | ✅ | ✅ | ✅ |
+| Registrarse | ✅ | — | — | — |
+| Agregar al carrito | ❌ | ✅ | ❌ | ❌ |
+| Realizar pedido | ❌ | ✅ | ❌ | ❌ |
+| Ver mis pedidos | ❌ | ✅ | ❌ | ❌ |
+| Ver todos los pedidos | ❌ | ❌ | ✅ | ✅ |
+| Confirmar / Enviar pedido | ❌ | ❌ | ✅ | ✅ |
+| CRUD Productos | ❌ | ❌ | ❌ | ✅ |
+| CRUD Marcas | ❌ | ❌ | ❌ | ✅ |
+| CRUD Usuarios | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+##  Flujo de un Pedido
+
+```
+CLIENTE                    EMPLEADO
+   │                          │
+   │  1. Explora catálogo      │
+   │  2. Agrega al carrito     │
+   │  3. Ingresa dirección     │
+   │  4. Confirma pedido       │
+   │     → Estado: PENDIENTE   │
+   │                          │
+   │                          │  5. Ve pedido PENDIENTE
+   │                          │  6. Revisa detalles
+   │                          │  7. Cambia → CONFIRMADO
+   │                          │  8. Cambia → ENVIADO
+   │                          │
+   │  9. Ve estado actualizado │
+   │     🚚 "¡En camino!"      │
+   │                          │
+```
+
+---
+
+##  Tecnologías Utilizadas
+
+### Frontend
+| Tecnología | Versión | Uso |
+|---|---|---|
+| React | 18.3.1 | Framework de UI |
+| Vite | 5.3.1 | Bundler y servidor de desarrollo |
+| React Router DOM | 6.23.1 | Navegación SPA |
+| CSS Variables | — | Sistema de diseño y temas |
+
+### Backend
+| Tecnología | Versión | Uso |
+|---|---|---|
+| Spring Boot | 4.0.5 | Framework principal |
+| Spring Security | 7.x | Autenticación y autorización |
+| Spring Data MongoDB | — | ORM para MongoDB |
+| jjwt | 0.12.6 | Generación y validación de JWT |
+| Lombok | — | Reducción de código boilerplate |
+| Springdoc OpenAPI | 2.3.0 | Documentación Swagger |
+
+### Infraestructura
+| Servicio | Plan | Uso |
+|---|---|---|
+| MongoDB Atlas | M0 (Gratuito) | Base de datos en la nube |
+| Render | Free | Hosting del backend |
+| Vercel | Hobby (Gratuito) | Hosting del frontend |
+| GitHub | — | Control de versiones |
+
+---
+
+##  Cómo ejecutar localmente
 
 ### Requisitos previos
-- Java 17
-- Gradle (incluido con `./gradlew`)
-- Node.js 18+ y npm
+- Java 17+
+- Node.js 18+
+- Cuenta en MongoDB Atlas
 
-### 1. Clonar y configurar
+### 1. Clonar el repositorio
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/JuanPabloBallesterosMaciasUis/Helader-a-Proyecto-Entornos.git
 cd Helader-a-Proyecto-Entornos
 ```
 
-### 2. Configurar MongoDB Atlas
-Edita `src/main/resources/application.properties`:
+### 2. Configurar el Backend
+
+Editar `src/main/resources/application.properties`:
 ```properties
-spring.data.mongodb.uri=mongodb+srv://admin:TU_CONTRASEÑA@mo.gziuz8l.mongodb.net/heladeria?retryWrites=true&w=majority&appName=MO
+spring.data.mongodb.uri=mongodb+srv://usuario:password@cluster.mongodb.net/heladeria
 spring.data.mongodb.database=heladeria
 server.port=8083
 jwt.secret=frosthub-heladeria-uis-secret-key-2025
 ```
 
-### 3. Arrancar el backend
+Ejecutar:
 ```bash
 ./gradlew bootRun
+# Backend disponible en http://localhost:8083
 ```
-Al arrancar por primera vez crea automáticamente el usuario administrador:
-- **Email:** `admin@heladeria.com`
-- **Contraseña:** `1234`
 
-{
-  "nombre": "Admin Principal",
-  "email": "admin@heladeria.com",
-  "contrasena": "$2a$10$Xl0yhvzLIaJjzeGR8di7..uXQOKPWWEPn5e8qSXkRJHYBMSHLBHqS",
-  "telefono": "3001234567",
-  "direccion": "Bucaramanga",
-  "rol": "ADMIN"
-}
-contrasena 1234 encriptada con 10 rounds
+### 3. Configurar el Frontend
 
-### 4. Arrancar el frontend (nueva terminal)
+Crear `frontend/.env`:
+```env
+VITE_API_URL=http://localhost:8083
+```
+
+Ejecutar:
 ```bash
 cd frontend
 npm install
 npm run dev
+# Frontend disponible en http://localhost:5173
 ```
 
-### 5. Abrir en el navegador
-```
-http://localhost:5173
-```
+### 4. Usuarios por defecto (DataSeeder)
 
----
+Al arrancar el backend por primera vez se crean automáticamente:
 
-##  Guía de Pruebas
-
-### Prueba 1 — Login exitoso
-1. Ir a `http://localhost:5173`
-2. Ingresar email: `admin@heladeria.com` / contraseña: `admin123`
-3. Resultado esperado: redirige al Dashboard con bienvenida y rol **ADMIN**
-![alt text](image.png)
-![alt text](image-1.png)
-
-### Prueba 2 — Registro de nuevo usuario
-1. En la pantalla de login, clic en ** Crear cuenta**
-2. Llenar todos los campos (nombre, teléfono, dirección, email, contraseña)
-3. Resultado esperado: mensaje de éxito y vuelve a la pestaña de login
-![alt text](image-2.png)
-![alt text](image-3.png)
-
-### Prueba 3 — Listar usuarios (solo ADMIN)
-1. Loguearse como ADMIN
-2. Ir a ** Usuarios** en el menú
-3. Resultado esperado: tabla con todos los usuarios registrados en MongoDB
-![alt text](image-4.png)
-
-### Prueba 4 — Crear usuario desde el panel
-1. En la página de Usuarios, clic en **＋ Nuevo Usuario**
-2. Llenar el formulario en el modal
-3. Resultado esperado: toast verde "Usuario creado" y aparece en la tabla
-![alt text](image-5.png)
-![alt text](image-6.png)
-![alt text](image-7.png)
-
-### Prueba 5 — Editar usuario
-1. En la tabla, clic en ** Editar** en cualquier fila
-2. Modificar nombre o rol
-3. Resultado esperado: toast "Usuario actualizado" y cambio reflejado
-![alt text](image-8.png)
-![alt text](image-9.png)
-![alt text](image-10.png)
-
-
-
-### Prueba 6 — Eliminar usuario (solo ADMIN)
-1. Clic en ** Borrar** en cualquier usuario
-2. Confirmar el diálogo
-3. Resultado esperado: usuario desaparece de la tabla
-![alt text](image-11.png)
-![alt text](image-12.png)
-![alt text](image-13.png)
-
-### Prueba 7 — Protección de rutas
-1. Sin estar logueado, intentar entrar a `http://localhost:5173/dashboard`
-2. Resultado esperado: redirige automáticamente a la pantalla de login
-![alt text](image-14.png)
-![alt text](image-15.png)
----
-
-##  Tecnologías Utilizadas
-
-| Capa | Tecnología | Versión |
+| Email | Contraseña | Rol |
 |---|---|---|
-| Frontend | React | 18.3.1 |
-| Frontend | Vite | 5.3.1 |
-| Frontend | React Router DOM | 6.23.1 |
-| Backend | Spring Boot | 3.4.1 |
-| Backend | Spring Security | 6.x |
-| Backend | Spring Data MongoDB | 4.4.1 |
-| Backend | jjwt (JWT) | 0.12.6 |
-| Backend | Lombok | latest |
-| Backend | Springdoc OpenAPI (Swagger) | 2.3.0 |
-| Base de datos | MongoDB Atlas | 8.0.23 |
-| Build | Gradle | 9.4.1 |
-| Lenguaje Backend | Java | 17 |
+| admin@heladeria.com | admin123 | ADMIN |
+| empleado@heladeria.com | empleado123 | EMPLEADO |
+
+Los clientes se registran desde la pantalla de login.
 
 ---
 
-##  Endpoints Disponibles
+##  Endpoints del API
 
-### Autenticación
-| Método | Endpoint | Descripción |
+### Autenticación (Público)
+| Método | Ruta | Descripción |
 |---|---|---|
-| POST | `/api/auth/login` | Login → retorna JWT |
-| GET | `/api/auth/verificar` | Valida token activo |
+| POST | `/api/auth/login` | Login → devuelve JWT |
+| GET | `/api/auth/verificar` | Verifica si el token es válido |
 
 ### Usuarios
-| Método | Endpoint | Descripción |
-|---|---|---|
-| GET | `/api/usuarios` | Listar todos (ADMIN) |
-| GET | `/api/usuarios/{id}` | Obtener por ID |
-| POST | `/api/usuarios` | Crear usuario |
-| PUT | `/api/usuarios/{id}` | Actualizar usuario |
-| DELETE | `/api/usuarios/{id}` | Eliminar (ADMIN) |
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/api/usuarios` | ADMIN | Listar todos |
+| POST | `/api/usuarios` | Público | Registrar cliente |
+| PUT | `/api/usuarios/{id}` | ADMIN | Actualizar |
+| DELETE | `/api/usuarios/{id}` | ADMIN | Eliminar |
 
-### Documentación Swagger
-Disponible en: `http://localhost:8083/swagger-ui/index.html`
+### Marcas
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/api/marcas` | Público | Listar todas |
+| POST | `/api/marcas` | ADMIN | Crear |
+| PUT | `/api/marcas/{id}` | ADMIN | Actualizar |
+| DELETE | `/api/marcas/{id}` | ADMIN | Eliminar |
+
+### Productos
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/api/productos` | Público | Listar todos |
+| POST | `/api/productos` | ADMIN | Crear con imagen |
+| PUT | `/api/productos/{id}` | ADMIN | Actualizar |
+| DELETE | `/api/productos/{id}` | ADMIN | Eliminar |
+
+### Pedidos
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/api/pedidos` | ADMIN/EMPLEADO | Todos los pedidos |
+| GET | `/api/pedidos/usuario/{id}` | CLIENTE | Mis pedidos |
+| GET | `/api/pedidos/estado/{estado}` | ADMIN/EMPLEADO | Filtrar por estado |
+| POST | `/api/pedidos` | CLIENTE | Crear pedido |
+| PATCH | `/api/pedidos/{id}/estado` | ADMIN/EMPLEADO | Cambiar estado |
+
+### Estados de un pedido
+```
+PENDIENTE → CONFIRMADO → ENVIADO
+```
 
 ---
 
-##  Requerimientos Funcionales Implementados
+##  Equipo de Desarrollo
 
-- ✅ **RF1** Registro de usuarios en la plataforma
-- ✅ **RF2** Autenticación y control de acceso con JWT
-- ✅ **RF3** Gestión de roles (ADMIN, EMPLEADO, CLIENTE)
-- ✅ **RF4** CRUD completo de usuarios desde el frontend
-- ✅ **RF5** Protección de rutas por rol en backend (Spring Security)
-- ✅ **RF6** Protección de rutas en frontend (ProtectedRoute)
-- ✅ **RF7** Conexión a base de datos en la nube (MongoDB Atlas)
-- ✅ **RF8** Búsqueda/filtrado de usuarios en tiempo real
+| Nombre |
+|---|---|
+| Juan Pablo Ballesteros Macías
+| Neiber Hernando Zipasuca Soto
+| Diego Barragan
+
+**Universidad Industrial de Santander — Bucaramanga, Colombia**
