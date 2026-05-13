@@ -1,6 +1,6 @@
 #  FrostHub — Plataforma de Gestión de Helados
 
-> **Proyecto FullStack · Universidad Industrial de Santander**  
+> **Proyecto FullStack · Universidad Industrial de Santander**
 > Ingeniería de Sistemas · Curso de Entornos de Programación
 
 
@@ -345,7 +345,7 @@ Los clientes se registran desde la pantalla de login.
 
 ### Estados de un pedido
 ```
-PENDIENTE → CONFIRMADO → ENVIADO
+PENDIENTE → CONFIRMADO → ENVIADO → LISTO PARA ENTREGAR
 ```
 
 ---
@@ -353,7 +353,7 @@ PENDIENTE → CONFIRMADO → ENVIADO
 ##  Equipo de Desarrollo
 
 | Nombre |
-|---|---|
+|---|
 | Juan Pablo Ballesteros Macías
 | Neiber Hernando Zipasuca Soto
 | Diego Barragan
