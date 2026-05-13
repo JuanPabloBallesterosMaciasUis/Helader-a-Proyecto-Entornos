@@ -297,8 +297,8 @@ Al arrancar el backend por primera vez se crean automáticamente:
 
 | Email | Contraseña | Rol |
 |---|---|---|
-| admin@heladeria.com | admin123 | ADMIN |
-| empleado@heladeria.com | empleado123 | EMPLEADO |
+| admin@heladeria.com | 1234 | ADMIN |
+| lauravalencia@gmail.com | 1234 | EMPLEADO |
 
 Los clientes se registran desde la pantalla de login.
 
